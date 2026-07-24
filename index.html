@@ -685,10 +685,13 @@ window.selectEdition = (id) => {
   document.getElementById('encVice').value = t.vice || '';
   document.getElementById('encFotos').value = (t.fotos || []).join('\n');
 
-  setListener('adminTimes', timesCol.where('torneioId', '==', id).orderBy('order', 'asc').onSnapshot(snap => {
-    adminEditionTeams = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  setListener('adminTimes', timesCol.where('torneioId', '==', id).onSnapshot(snap => {
+    adminEditionTeams = snap.docs.map(d => ({ id: d.id, ...d.data() })).sort((a, b) => (a.order || 0) - (b.order || 0));
     renderEditionTeamsList();
     populateJogoTeamSelects();
+  }, err => {
+    console.error('Erro ao carregar times:', err);
+    document.getElementById('editionTeamsList').innerHTML = '<span class="hint" style="color:var(--red);">Erro ao carregar times. Veja o console.</span>';
   }));
   setListener('adminJogos', jogosCol.where('torneioId', '==', id).onSnapshot(snap => {
     adminEditionJogos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
